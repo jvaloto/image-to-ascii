@@ -1,31 +1,35 @@
-const symbol = ['@','#','$','*','%','/',';',',','.','&nbsp;'];
-const newImage = document.querySelector('.div');
+const symbol = ['@','#','$','*','%','{','}','[',']','/','!',';',',','.','&nbsp;'];
+const newImage = document.getElementById('new-image');
 
+var detailLevel = 5;
 var img = document.getElementById('my-image');
 var canvas = document.createElement('canvas');
+var ctx = canvas.getContext('2d');
+
 canvas.width = img.width;
 canvas.height = img.height;
-canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
+ctx.drawImage(img, 0, 0);
 
+function draw(){
+    document.getElementById('new-image').innerHTML = '';
 
-for(let h = 0; h < img.height; h ++){
-    let newLine = document.createElement('span');
-    newLine.innerHTML = '';
-    
-    for(let w = 0; w < img.width; w ++){
-        let data = canvas.getContext('2d').getImageData(w, h, 1, 1).data;
+    for(let h = 0; h < img.height; h += detailLevel){
+        let newLine = document.createElement('span');
+        newLine.innerHTML = '';
+        
+        for(let w = 0; w < img.width; w += detailLevel){
+            let data = ctx.getImageData(w, h, img.width, img.height).data;
 
-        let d = getSymbol(data[0], data[1], data[2]);
+            newLine.innerHTML += getSymbol(data[0], data[1], data[2]);
+        }
 
-        newLine.innerHTML += d;
+        document.getElementById('new-image').appendChild(newLine);
+        document.getElementById('new-image').appendChild(document.createElement('br'));
     }
-
-    document.querySelector('#new-image').appendChild(newLine);
-    document.querySelector('#new-image').appendChild(document.createElement('br'));
 }
 
-function getSymbol(r,g,b){
-    let number = Math.floor((r+g+b)/3);
+function getSymbol(r, g, b){
+    let number = Math.floor(( r + g + b ) / 3);
     let baseValue = 255 / symbol.length;
     let currentValue = baseValue;
     let toReturn;
@@ -42,38 +46,16 @@ function getSymbol(r,g,b){
     return toReturn;
 }
 
-// function openCam(){
-//     let All_mediaDevices=navigator.mediaDevices
-//     if (!All_mediaDevices || !All_mediaDevices.getUserMedia) {
-//        console.log("getUserMedia() not supported.");
-//        return;
-//     }
-//     All_mediaDevices.getUserMedia({
-//        video: true
-//     })
-//     .then(function(vidStream) {
-//        var video = document.getElementById('videoCam');
-//        if ("srcObject" in video) {
-//           video.srcObject = vidStream;
-//        } else {
-//           video.src = window.URL.createObjectURL(vidStream);
-//           draw();
-//        }
-//        video.onloadedmetadata = function(e) {
-//           video.play();
+draw();
 
-//           draw();
-//        };
-//     })
-//     .catch(function(e) {
-//        console.log(e.name + ": " + e.message);
-//     });
-//  }
-
-
-img.addEventListener('change', (event) =>{
-    var pixelData = canvas.getContext('2d').getImageData(event.offsetX, event.offsetY, 1, 1).data;
-
-    console.log(pixelData);
+document.getElementById('button-add').addEventListener('click', (event) =>{
+    detailLevel --;
+    
+    draw();
 });
 
+document.getElementById('button-remove').addEventListener('click', (event) =>{
+    detailLevel ++;
+
+    draw();
+});
